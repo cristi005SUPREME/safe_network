@@ -78,8 +78,9 @@ impl RegisterStorage {
 
     /// Update our Register's replica on receiving data from other nodes.
     pub(super) async fn update(&self, data: &ReplicatedRegisterLog) -> Result<StorageLevel> {
-        debug!("Updating Register store: {:?}", data.address);
-        let mut stored_reg = self.try_load_stored_register(&data.address).await?;
+        let addr = data.address;
+        debug!("Updating Register store: {addr:?}");
+        let mut stored_reg = self.try_load_stored_register(&addr).await?;
 
         let mut log_to_write = Vec::new();
         for replicated_cmd in &data.op_log {
@@ -98,7 +99,7 @@ impl RegisterStorage {
 
         // Write the new cmds all to disk
         self.file_store
-            .write_log_to_disk(&log_to_write, &stored_reg.op_log_path)
+            .write_log_to_disk(&log_to_write, stored_reg, addr)
             .await
     }
 
@@ -106,16 +107,17 @@ impl RegisterStorage {
 
     pub(super) async fn write(&self, cmd: &RegisterCmd) -> Result<StorageLevel> {
         info!("Writing register cmd: {:?}", cmd);
+        let addr = cmd.dst_address();
         // Let's first try to load and reconstruct the replica of targetted Register
         // we have in local storage, to then try to apply the new command onto it.
-        let mut stored_reg = self.try_load_stored_register(&cmd.dst_address()).await?;
+        let mut stored_reg = self.try_load_stored_register(&addr).await?;
 
         self.try_to_apply_cmd_against_register_state(cmd, &mut stored_reg)
             .await?;
 
         // Everything went fine, let's write the single cmd to disk
         self.file_store
-            .write_log_to_disk(&vec![cmd.clone()], &stored_reg.op_log_path)
+            .write_log_to_disk(&vec![cmd.clone()], stored_reg, addr)
             .await
     }
 
