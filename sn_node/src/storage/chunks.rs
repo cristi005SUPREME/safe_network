@@ -30,7 +30,7 @@ use tracing::info;
 use xor_name::XorName;
 
 const CHUNKS_STORE_DIR_NAME: &str = "chunks";
-const CHUNKS_CACHE_SIZE: usize = 20 * 1024 * 1024;
+const CHUNKS_CACHE_SIZE: usize = 30 * 1024 * 1024;
 const CHUNKS_CACHE_TTL: Duration = Duration::from_millis(70_000);
 
 /// Operations on data chunks.

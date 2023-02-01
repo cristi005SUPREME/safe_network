@@ -34,7 +34,7 @@ use tokio::{
 };
 use xor_name::XorName;
 
-const REGISTERS_CACHE_SIZE: usize = 20 * 1024 * 1024;
+const REGISTERS_CACHE_SIZE: usize = 10 * 1024 * 1024;
 const REGISTERS_CACHE_TTL: Duration = Duration::from_millis(70_000);
 
 // Deterministic Id for a register Cmd, takes into account the underlying cmd, and all sigs
